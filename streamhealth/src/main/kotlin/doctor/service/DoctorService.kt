@@ -15,11 +15,11 @@ interface DoctorService {
     suspend fun getAllDoctors(): List<DoctorResponse>
 
     /**
-     * Get doctor by ID
-     * @param doctorId Doctor document ID
+     * Get doctor by user ID (idNumber/Cédula)
+     * @param idNumber User's identification number (Cédula)
      * @return DoctorResponse with enriched user data if found, null otherwise
      */
-    suspend fun getDoctorById(doctorId: String): DoctorResponse?
+    suspend fun getDoctorByUserId(idNumber: String): DoctorResponse?
 
     /**
      * Create doctor profile for a user

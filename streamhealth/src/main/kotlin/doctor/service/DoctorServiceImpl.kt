@@ -44,10 +44,10 @@ class DoctorServiceImpl(
         }
     }
 
-    override suspend fun getDoctorById(doctorId: String): DoctorResponse? = withContext(Dispatchers.IO) {
-        log.info("Getting doctor by id: {}", doctorId)
+    override suspend fun getDoctorByUserId(idNumber: String): DoctorResponse? = withContext(Dispatchers.IO) {
+        log.info("Getting doctor by idNumber: {}", idNumber)
 
-        val doctor = doctorRepository.findById(doctorId) ?: return@withContext null
+        val doctor = doctorRepository.findByUserId(idNumber) ?: return@withContext null
         val user = userRepository.findByIdNumber(doctor.userId) ?: return@withContext null
 
         doctor.toDoctorResponse(
