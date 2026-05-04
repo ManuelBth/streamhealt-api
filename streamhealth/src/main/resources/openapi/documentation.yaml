@@ -272,6 +272,170 @@ paths:
           description: Forbidden - insufficient permissions
         '404':
           description: Doctor not found
+  /api/v1/schedule/patient:
+    post:
+      summary: Create appointment
+      description: Patient books an appointment with a doctor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentRequest'
+            example:
+              fecha: "2024-12-15T10:00:00Z"
+              doctorId: "12345678"
+              patientId: "87654321"
+              motivo: "Dolor de cabeza persistente"
+      responses:
+        '201':
+          description: Appointment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - invalid role
+  /api/v1/schedule/patient/{idNumber}:
+    get:
+      summary: Get patient appointments
+      description: Retrieve all appointments for a specific patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: idNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Patient identification number (cedula)
+          example: "87654321"
+      responses:
+        '200':
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          description: Unauthorized
+  /api/v1/schedule/patient/{appointmentId}:
+    put:
+      summary: Update patient appointment
+      description: Patient cancels their own appointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Appointment ID (format: yyyyMMdd-XXXXXX)
+          example: "20241215-ABC123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                  enum: [cancelada]
+      responses:
+        '200':
+          description: Appointment updated
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Appointment not found
+    delete:
+      summary: Delete appointment
+      description: Patient deletes their own appointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Appointment deleted
+        '401':
+          description: Unauthorized
+  /api/v1/schedule/doctor/{idNumber}:
+    get:
+      summary: Get doctor appointments
+      description: Retrieve all appointments for a specific doctor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: idNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Doctor identification number (cedula)
+          example: "12345678"
+      responses:
+        '200':
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          description: Unauthorized
+  /api/v1/schedule/doctor/{appointmentId}:
+    put:
+      summary: Update doctor appointment
+      description: Doctor updates appointment status (confirm, complete, cancel)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                  enum: [confirmada, cancelada, completada]
+      responses:
+        '200':
+          description: Appointment updated
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Appointment not found
 components:
   securitySchemes:
     bearerAuth:
@@ -371,180 +535,6 @@ components:
           type: string
           description: Last name of the doctor
           example: "Perez"
-
-  # ========================
-  # SCHEDULE / CITAS
-  # ========================
-  /api/v1/schedule/patient:
-    post:
-      summary: Create appointment
-      description: Patient books an appointment with a doctor
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateAppointmentRequest'
-            example:
-              fecha: "2024-12-15T10:00:00Z"
-              doctorId: "12345678"
-              patientId: "87654321"
-              motivo: "Dolor de cabeza persistente"
-      responses:
-        '201':
-          description: Appointment created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AppointmentResponse'
-        '400':
-          description: Invalid input
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden - invalid role
-
-  /api/v1/schedule/patient/{idNumber}:
-    get:
-      summary: Get patient appointments
-      description: Retrieve all appointments for a specific patient
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: idNumber
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Patient identification number (cedula)
-          example: "87654321"
-      responses:
-        '200':
-          description: List of appointments
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AppointmentResponse'
-        '401':
-          description: Unauthorized
-
-  /api/v1/schedule/patient/{appointmentId}:
-    put:
-      summary: Update patient appointment
-      description: Patient cancels their own appointment
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: appointmentId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Appointment ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                estado:
-                  type: string
-                  enum: [cancelada]
-      responses:
-        '200':
-          description: Appointment updated
-        '400':
-          description: Invalid input
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Appointment not found
-    delete:
-      summary: Delete appointment
-      description: Patient deletes their own appointment
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: appointmentId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Appointment deleted
-        '401':
-          description: Unauthorized
-
-  /api/v1/schedule/doctor/{idNumber}:
-    get:
-      summary: Get doctor appointments
-      description: Retrieve all appointments for a specific doctor
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: idNumber
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Doctor identification number (cedula)
-          example: "12345678"
-      responses:
-        '200':
-          description: List of appointments
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AppointmentResponse'
-        '401':
-          description: Unauthorized
-
-  /api/v1/schedule/doctor/{appointmentId}:
-    put:
-      summary: Update doctor appointment
-      description: Doctor updates appointment status (confirm, complete, cancel)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: appointmentId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                estado:
-                  type: string
-                  enum: [confirmada, cancelada, completada]
-      responses:
-        '200':
-          description: Appointment updated
-        '400':
-          description: Invalid input
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Appointment not found
-
-components:
-  schemas:
     CreateAppointmentRequest:
       type: object
       required:
@@ -570,7 +560,6 @@ components:
           type: string
           description: Reason for the appointment / symptoms
           example: "Dolor de cabeza persistente"
-
     UpdateAppointmentRequest:
       type: object
       properties:
@@ -579,14 +568,13 @@ components:
           description: New appointment status
           enum: [pendiente, confirmada, cancelada, completada]
           example: "cancelada"
-
     AppointmentResponse:
       type: object
       properties:
-        id:
+        appointmentId:
           type: string
-          description: Unique appointment identifier
-          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: Unique human-readable appointment ID (format: yyyyMMdd-XXXXXX)
+          example: "20241215-ABC123"
         patientId:
           type: string
           description: Patient's identification number (cedula)
