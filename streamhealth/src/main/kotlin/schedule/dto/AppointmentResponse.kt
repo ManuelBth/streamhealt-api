@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AppointmentResponse(
     val id: String,
+    val appointmentId: String,
     val patientId: String,
     val doctorId: String,
     val fecha: String,
@@ -24,6 +25,7 @@ data class AppointmentResponse(
 fun AppointmentDocument.toAppointmentResponse(): AppointmentResponse {
     return AppointmentResponse(
         id = this.id ?: "",
+        appointmentId = this.appointmentId,
         patientId = this.patientId,
         doctorId = this.doctorId,
         fecha = this.fecha,
