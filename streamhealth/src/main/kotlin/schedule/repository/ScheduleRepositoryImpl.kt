@@ -28,6 +28,11 @@ class ScheduleRepositoryImpl : ScheduleRepository {
         document?.let { AppointmentDocument.fromDocument(it) }
     }
 
+    override suspend fun findByAppointmentId(appointmentId: String): AppointmentDocument? = withContext(Dispatchers.IO) {
+        val document = collection.find(Filters.eq("appointmentId", appointmentId)).first()
+        document?.let { AppointmentDocument.fromDocument(it) }
+    }
+
     override suspend fun findByPatientId(patientId: String): List<AppointmentDocument> = withContext(Dispatchers.IO) {
         val documents = collection.find(Filters.eq("patientId", patientId)).into(mutableListOf<Document>())
         documents.map { AppointmentDocument.fromDocument(it) }
@@ -42,14 +47,13 @@ class ScheduleRepositoryImpl : ScheduleRepository {
         val document = appointment.toDocument()
         collection.insertOne(document)
 
-        // Get the inserted ID
         val insertedId = document.getObjectId("_id").toString()
         appointment.copy(id = insertedId)
     }
 
-    override suspend fun update(id: String, appointment: AppointmentDocument): AppointmentDocument? = withContext(Dispatchers.IO) {
+    override suspend fun update(appointmentId: String, appointment: AppointmentDocument): AppointmentDocument? = withContext(Dispatchers.IO) {
         val result = collection.updateOne(
-            Filters.eq("_id", id),
+            Filters.eq("appointmentId", appointmentId),
             Updates.combine(
                 Updates.set("patientId", appointment.patientId),
                 Updates.set("doctorId", appointment.doctorId),
@@ -62,14 +66,14 @@ class ScheduleRepositoryImpl : ScheduleRepository {
         )
 
         if (result.modifiedCount > 0) {
-            findById(id)
+            findByAppointmentId(appointmentId)
         } else {
             null
         }
     }
 
-    override suspend fun delete(id: String): Boolean = withContext(Dispatchers.IO) {
-        val result = collection.deleteOne(Filters.eq("_id", id))
+    override suspend fun delete(appointmentId: String): Boolean = withContext(Dispatchers.IO) {
+        val result = collection.deleteOne(Filters.eq("appointmentId", appointmentId))
         result.deletedCount > 0
     }
 }

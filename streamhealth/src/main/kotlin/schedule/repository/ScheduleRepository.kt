@@ -7,11 +7,18 @@ import com.betha.schedule.document.AppointmentDocument
  */
 interface ScheduleRepository {
     /**
-     * Find appointment by ID
-     * @param id Appointment ID (MongoDB ObjectId as String)
+     * Find appointment by MongoDB ID
+     * @param id MongoDB ObjectId as String
      * @return AppointmentDocument if found, null otherwise
      */
     suspend fun findById(id: String): AppointmentDocument?
+
+    /**
+     * Find appointment by compound appointment ID
+     * @param appointmentId Compound appointment ID (e.g., "20241215-ABC123")
+     * @return AppointmentDocument if found, null otherwise
+     */
+    suspend fun findByAppointmentId(appointmentId: String): AppointmentDocument?
 
     /**
      * Find all appointments for a patient
@@ -29,23 +36,23 @@ interface ScheduleRepository {
 
     /**
      * Save a new appointment
-     * @param appointment AppointmentDocument to save
-     * @return Saved AppointmentDocument with generated ID
+     * @param appointment AppointmentDocument to save (with appointmentId already generated)
+     * @return Saved AppointmentDocument
      */
     suspend fun save(appointment: AppointmentDocument): AppointmentDocument
 
     /**
      * Update an existing appointment
-     * @param id Appointment ID
+     * @param appointmentId Compound appointment ID
      * @param appointment Updated AppointmentDocument
      * @return Updated AppointmentDocument if found, null otherwise
      */
-    suspend fun update(id: String, appointment: AppointmentDocument): AppointmentDocument?
+    suspend fun update(appointmentId: String, appointment: AppointmentDocument): AppointmentDocument?
 
     /**
      * Delete an appointment
-     * @param id Appointment ID
+     * @param appointmentId Compound appointment ID
      * @return true if deleted, false otherwise
      */
-    suspend fun delete(id: String): Boolean
+    suspend fun delete(appointmentId: String): Boolean
 }
