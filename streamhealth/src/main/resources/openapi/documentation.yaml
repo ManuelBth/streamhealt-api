@@ -145,16 +145,18 @@ paths:
           description: Bad request
         '401':
           description: Unauthorized
-  /api/v1/user/{userId}:
+  /api/v1/user/{idNumber}:
     get:
-      summary: Get user by ID
+      summary: Get user by ID Number
+      description: Get user profile by their identification number (cedula)
       parameters:
-        - name: userId
+        - name: idNumber
           in: path
           required: true
           schema:
             type: string
-          example: "abc123"
+          description: User identification number (cedula)
+          example: "12345678"
       security:
         - bearerAuth: []
       responses:
@@ -162,10 +164,28 @@ paths:
           description: User found
         '404':
           description: User not found
-  /api/v1/user/me/doctor-perfil:
+  /api/v1/doctors:
+    get:
+      summary: List all doctors
+      description: Retrieve a list of all doctors with their profiles
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of doctors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - insufficient permissions
     post:
       summary: Create doctor profile
-      description: Create professional profile for authenticated doctor
+      description: Create a new doctor profile (requires DOCTOR role)
       security:
         - bearerAuth: []
       requestBody:
@@ -173,24 +193,30 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                especialidad:
-                  type: string
-                licencia:
-                  type: string
-                telefono:
-                  type: string
-                direccion:
-                  type: string
+              $ref: '#/components/schemas/CreateDoctorProfileRequest'
+            example:
+              titulo: "Dr."
+              universidad: "Universidad de Costa Rica"
+              especialidades: ["Medicina General", "Pediatria"]
+              doctorados: ["Investigacion Clinica"]
       responses:
         '201':
           description: Doctor profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorResponse'
         '400':
           description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires DOCTOR role
+        '409':
+          description: Conflict - doctor profile already exists
     put:
       summary: Update doctor profile
-      description: Update professional profile of authenticated doctor
+      description: Update an existing doctor profile (requires DOCTOR role)
       security:
         - bearerAuth: []
       requestBody:
@@ -198,22 +224,152 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                especialidad:
-                  type: string
-                licencia:
-                  type: string
-                telefono:
-                  type: string
-                direccion:
-                  type: string
+              $ref: '#/components/schemas/UpdateDoctorProfileRequest'
+            example:
+              titulo: "Dr."
+              universidad: "Universidad de Costa Rica"
+              especialidades: ["Medicina General", "Cardiologia"]
+              doctorados: ["Investigacion Clinica", "Salud Publica"]
       responses:
         '200':
           description: Doctor profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires DOCTOR role
+        '404':
+          description: Doctor profile not found
+  /api/v1/doctors/{doctorId}:
+    get:
+      summary: Get doctor by ID
+      description: Retrieve a specific doctor by their doctor ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: doctorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the doctor
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Doctor found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Doctor not found
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    CreateDoctorProfileRequest:
+      type: object
+      properties:
+        titulo:
+          type: string
+          description: Title or prefix (e.g., Dr., Dra.)
+          example: "Dr."
+          nullable: true
+        universidad:
+          type: string
+          description: University where the doctor graduated
+          example: "Universidad de Costa Rica"
+          nullable: true
+        especialidades:
+          type: array
+          items:
+            type: string
+          description: List of medical specialties
+          example: ["Medicina General", "Pediatria"]
+        doctorados:
+          type: array
+          items:
+            type: string
+          description: List of doctoral degrees or certifications
+          example: ["Investigacion Clinica"]
+    UpdateDoctorProfileRequest:
+      type: object
+      properties:
+        titulo:
+          type: string
+          description: Title or prefix (e.g., Dr., Dra.)
+          example: "Dr."
+          nullable: true
+        universidad:
+          type: string
+          description: University where the doctor graduated
+          example: "Universidad de Costa Rica"
+          nullable: true
+        especialidades:
+          type: array
+          items:
+            type: string
+          description: List of medical specialties
+          example: ["Medicina General", "Cardiologia"]
+          nullable: true
+        doctorados:
+          type: array
+          items:
+            type: string
+          description: List of doctoral degrees or certifications
+          example: ["Investigacion Clinica", "Salud Publica"]
+          nullable: true
+    DoctorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the doctor profile
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        userId:
+          type: string
+          format: uuid
+          description: User ID associated with this doctor profile
+          example: "660e8400-e29b-41d4-a716-446655440001"
+        titulo:
+          type: string
+          description: Title or prefix (e.g., Dr., Dra.)
+          example: "Dr."
+        universidad:
+          type: string
+          description: University where the doctor graduated
+          example: "Universidad de Costa Rica"
+        especialidades:
+          type: array
+          items:
+            type: string
+          description: List of medical specialties
+          example: ["Medicina General", "Pediatria"]
+        doctorados:
+          type: array
+          items:
+            type: string
+          description: List of doctoral degrees or certifications
+          example: ["Investigacion Clinica"]
+        nombres:
+          type: string
+          description: First name of the doctor
+          example: "Juan"
+        apellidos:
+          type: string
+          description: Last name of the doctor
+          example: "Perez"
