@@ -1,0 +1,39 @@
+package com.betha.doctor.service
+
+import com.betha.doctor.dto.CreateDoctorProfileRequest
+import com.betha.doctor.dto.DoctorResponse
+import com.betha.doctor.dto.UpdateDoctorProfileRequest
+
+/**
+ * Service interface for doctor operations
+ */
+interface DoctorService {
+    /**
+     * Get all doctors
+     * @return List of DoctorResponse with enriched user data
+     */
+    suspend fun getAllDoctors(): List<DoctorResponse>
+
+    /**
+     * Get doctor by ID
+     * @param doctorId Doctor document ID
+     * @return DoctorResponse with enriched user data if found, null otherwise
+     */
+    suspend fun getDoctorById(doctorId: String): DoctorResponse?
+
+    /**
+     * Create doctor profile for a user
+     * @param userId User's identification number (Cédula)
+     * @param request Doctor profile data
+     * @return DoctorResponse if user exists and is DOCTOR role, null otherwise
+     */
+    suspend fun createDoctorProfile(userId: String, request: CreateDoctorProfileRequest): DoctorResponse?
+
+    /**
+     * Update doctor profile
+     * @param userId User's identification number (Cédula)
+     * @param request Doctor profile update data
+     * @return Updated DoctorResponse if found, null otherwise
+     */
+    suspend fun updateDoctorProfile(userId: String, request: UpdateDoctorProfileRequest): DoctorResponse?
+}
