@@ -13,8 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ofPattern
+import kotlin.random.Random
 
 /**
  * Schedule service implementation
@@ -27,33 +30,36 @@ class ScheduleServiceImpl(
     companion object {
         private val log = LoggerFactory.getLogger(ScheduleServiceImpl::class.java)
 
-        // Estados válidos por rol
         val PACIENTE_ESTADOS_VALIDOS = setOf("cancelada")
         val DOCTOR_ESTADOS_VALIDOS = setOf("confirmada", "cancelada", "completada")
+    }
+
+    private fun generateAppointmentId(): String {
+        val date = LocalDate.now().format(ofPattern("yyyyMMdd"))
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        val random = (1..6).map { chars[Random.nextInt(chars.length)] }.joinToString("")
+        return "$date-$random"
     }
 
     override suspend fun createAppointment(request: CreateAppointmentRequest): AppointmentResponse? = withContext(Dispatchers.IO) {
         log.info("Creating appointment for patient: {} with doctor: {}", request.patientId, request.doctorId)
 
-        // Validar doctor existe y tiene rol DOCTOR
         val doctor = userRepository.findByIdNumber(request.doctorId)
             ?: throw IllegalArgumentException("Doctor no encontrado")
         if (doctor.rol != Rol.DOCTOR) {
             throw IllegalArgumentException("El usuario no es un doctor válido")
         }
 
-        // Validar paciente existe y tiene rol PACIENTE
         val patient = userRepository.findByIdNumber(request.patientId)
             ?: throw IllegalArgumentException("Paciente no encontrado")
         if (patient.rol != Rol.PACIENTE) {
             throw IllegalArgumentException("El usuario no es un paciente válido")
         }
 
-        // Validar fecha es en el futuro
         validateFutureDate(request.fecha)
 
-        // Crear cita
         val appointment = AppointmentDocument(
+            appointmentId = generateAppointmentId(),
             patientId = request.patientId,
             doctorId = request.doctorId,
             fecha = request.fecha,
@@ -68,7 +74,6 @@ class ScheduleServiceImpl(
     override suspend fun getPatientAppointments(patientId: String): List<AppointmentResponse> = withContext(Dispatchers.IO) {
         log.info("Getting appointments for patient: {}", patientId)
 
-        // Validar paciente existe
         val patient = userRepository.findByIdNumber(patientId)
             ?: throw IllegalArgumentException("Paciente no encontrado")
 
@@ -79,7 +84,6 @@ class ScheduleServiceImpl(
     override suspend fun getDoctorAppointments(doctorId: String): List<AppointmentResponse> = withContext(Dispatchers.IO) {
         log.info("Getting appointments for doctor: {}", doctorId)
 
-        // Validar doctor existe
         val doctor = userRepository.findByIdNumber(doctorId)
             ?: throw IllegalArgumentException("Doctor no encontrado")
         if (doctor.rol != Rol.DOCTOR) {
@@ -93,11 +97,9 @@ class ScheduleServiceImpl(
     override suspend fun updatePatientAppointment(appointmentId: String, request: UpdateAppointmentRequest): AppointmentResponse? = withContext(Dispatchers.IO) {
         log.info("Patient updating appointment: {}", appointmentId)
 
-        // Buscar cita existente
-        val existing = scheduleRepository.findById(appointmentId)
+        val existing = scheduleRepository.findByAppointmentId(appointmentId)
             ?: throw IllegalArgumentException("Cita no encontrada")
 
-        // Paciente solo puede cancelar
         val nuevoEstado = request.estado ?: existing.estado
         if (nuevoEstado != existing.estado) {
             if (nuevoEstado !in PACIENTE_ESTADOS_VALIDOS) {
@@ -119,11 +121,9 @@ class ScheduleServiceImpl(
     override suspend fun updateDoctorAppointment(appointmentId: String, request: UpdateAppointmentRequest): AppointmentResponse? = withContext(Dispatchers.IO) {
         log.info("Doctor updating appointment: {}", appointmentId)
 
-        // Buscar cita existente
-        val existing = scheduleRepository.findById(appointmentId)
+        val existing = scheduleRepository.findByAppointmentId(appointmentId)
             ?: throw IllegalArgumentException("Cita no encontrada")
 
-        // Doctor puede confirmar, cancelar o completar
         val nuevoEstado = request.estado ?: existing.estado
         if (nuevoEstado != existing.estado) {
             if (nuevoEstado !in DOCTOR_ESTADOS_VALIDOS) {
@@ -145,46 +145,33 @@ class ScheduleServiceImpl(
     override suspend fun deleteAppointment(appointmentId: String): Boolean = withContext(Dispatchers.IO) {
         log.info("Deleting appointment: {}", appointmentId)
 
-        // Validar que la cita existe
-        val existing = scheduleRepository.findById(appointmentId)
+        val existing = scheduleRepository.findByAppointmentId(appointmentId)
             ?: throw IllegalArgumentException("Cita no encontrada")
 
         scheduleRepository.delete(appointmentId)
     }
 
-    /**
-     * Validar que la fecha es en el futuro
-     * Acepta formatos ISO8601: "2024-12-15T10:00:00Z", "2024-12-15T10:00:00-03:00", "2024-12-15T10:00:00"
-     */
     private fun validateFutureDate(fecha: String) {
         try {
-            // Intentar parser flexible para ISO8601
             val dateTime = parseIso8601DateTime(fecha)
             if (dateTime.isBefore(ZonedDateTime.now())) {
                 throw IllegalArgumentException("La fecha debe ser en el futuro")
             }
         } catch (e: IllegalArgumentException) {
-            throw e  // Re-lanzar mensajes de error ya formateados
+            throw e
         } catch (e: Exception) {
             throw IllegalArgumentException("Formato de fecha inválido. Use ISO8601 (ej: 2024-12-31T10:00:00Z o 2024-12-31T10:00:00-03:00)")
         }
     }
 
-    /**
-     * Parse flexible para fechas ISO8601
-     * Acepta: Z, +00:00, -03:00, o sin timezone
-     */
     private fun parseIso8601DateTime(fecha: String): ZonedDateTime {
         return when {
-            // Termina en Z (UTC)
             fecha.endsWith("Z") -> {
                 ZonedDateTime.parse(fecha.replace("Z", "+00:00"))
             }
-            // Tiene offset como +00:00 o -03:00
             fecha.contains(Regex("([+-]\\d{2}:?\\d{2})$")) -> {
                 ZonedDateTime.parse(fecha)
             }
-            // Sin timezone - asumir hora local
             else -> {
                 ZonedDateTime.of(
                     java.time.LocalDateTime.parse(fecha),
