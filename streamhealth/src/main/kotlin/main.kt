@@ -13,6 +13,10 @@ import com.betha.doctor.repository.DoctorRepository
 import com.betha.doctor.repository.DoctorRepositoryImpl
 import com.betha.doctor.service.DoctorService
 import com.betha.doctor.service.DoctorServiceImpl
+import com.betha.schedule.repository.ScheduleRepository
+import com.betha.schedule.repository.ScheduleRepositoryImpl
+import com.betha.schedule.service.ScheduleService
+import com.betha.schedule.service.ScheduleServiceImpl
 import com.betha.user.repository.UserRepository
 import com.betha.user.repository.UserRepositoryImpl
 import com.betha.user.service.UserService
@@ -41,7 +45,8 @@ fun Application.configureKoin() {
             jwtModule,
             authModule,
             userModule,
-            doctorModule
+            doctorModule,
+            scheduleModule
         )
     }
 }
@@ -77,4 +82,10 @@ val userModule = org.koin.dsl.module {
 val doctorModule = org.koin.dsl.module {
     single<DoctorRepository> { DoctorRepositoryImpl() }
     single<DoctorService> { DoctorServiceImpl(get(), get()) }
+}
+
+// Módulo de schedule/citas
+val scheduleModule = org.koin.dsl.module {
+    single<ScheduleRepository> { ScheduleRepositoryImpl() }
+    single<ScheduleService> { ScheduleServiceImpl(get(), get()) }
 }

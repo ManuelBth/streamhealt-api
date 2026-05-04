@@ -4,6 +4,8 @@ import com.betha.auth.controller.authController
 import com.betha.auth.service.AuthService
 import com.betha.doctor.controller.doctorController
 import com.betha.doctor.service.DoctorService
+import com.betha.schedule.controller.scheduleController
+import com.betha.schedule.service.ScheduleService
 import com.betha.user.controller.userController
 import com.betha.user.service.UserService
 import io.ktor.http.HttpHeaders
@@ -26,6 +28,7 @@ fun Application.configureRouting() {
     val authService: AuthService by inject()
     val userService: UserService by inject()
     val doctorService: DoctorService by inject()
+    val scheduleService: ScheduleService by inject()
 
     routing {
         // Ruta raíz
@@ -37,6 +40,7 @@ fun Application.configureRouting() {
         authController(authService)
         userController(userService, authService)
         doctorController(doctorService, authService)
+        scheduleController(scheduleService, authService)
 
         // Swagger UI al final
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
