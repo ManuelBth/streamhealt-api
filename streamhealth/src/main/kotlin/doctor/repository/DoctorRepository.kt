@@ -34,6 +34,14 @@ interface DoctorRepository {
     suspend fun save(doctor: DoctorDocument): DoctorDocument
 
     /**
+     * Update an existing doctor document by userId
+     * @param userId User's identification number (Cédula)
+     * @param doctor Updated DoctorDocument
+     * @return Updated DoctorDocument if found, null otherwise
+     */
+    suspend fun updateByUserId(userId: String, doctor: DoctorDocument): DoctorDocument?
+
+    /**
      * Update an existing doctor document
      * @param id Doctor document ID
      * @param doctor Updated DoctorDocument

@@ -47,6 +47,30 @@ class DoctorRepositoryImpl : DoctorRepository {
         doctor.copy(id = insertedId)
     }
 
+    override suspend fun updateByUserId(userId: String, doctor: DoctorDocument): DoctorDocument? = withContext(Dispatchers.IO) {
+        val result = collection.updateOne(
+            Filters.eq("userId", userId),
+            Updates.combine(
+                Updates.set("userId", doctor.userId),
+                Updates.set("titulo", doctor.titulo),
+                Updates.set("universidad", doctor.universidad),
+                Updates.set("especialidades", doctor.especialidades),
+                Updates.set("doctorados", doctor.doctorados),
+                Updates.set("licencia", doctor.licencia),
+                Updates.set("telefono", doctor.telefono),
+                Updates.set("direccion", doctor.direccion),
+                Updates.set("updatedAt", System.currentTimeMillis())
+            ),
+            UpdateOptions().upsert(false)
+        )
+
+        if (result.modifiedCount > 0) {
+            findByUserId(userId)
+        } else {
+            null
+        }
+    }
+
     override suspend fun update(id: String, doctor: DoctorDocument): DoctorDocument? = withContext(Dispatchers.IO) {
         val result = collection.updateOne(
             Filters.eq("_id", id),
