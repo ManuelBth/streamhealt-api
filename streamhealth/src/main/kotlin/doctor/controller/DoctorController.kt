@@ -16,7 +16,7 @@ import io.ktor.server.routing.*
  *
  * Endpoints:
  * - GET /api/v1/doctors - List all doctors (requires JWT auth)
- * - GET /api/v1/doctors/{doctorId} - Get doctor by ID (requires JWT auth)
+ * - GET /api/v1/doctors/{idNumber} - Get doctor by ID Number/Cédula (requires JWT auth)
  * - POST /api/v1/doctors - Create doctor profile (DOCTOR role only)
  * - PUT /api/v1/doctors - Update doctor profile (DOCTOR role only)
  *
@@ -62,15 +62,15 @@ fun Routing.doctorController(
         }
 
         /**
-         * Get doctor by ID
+         * Get doctor by ID Number (Cédula)
          *
-         * Retrieves a specific doctor's profile by their doctor ID
+         * Retrieves a specific doctor's profile by their user ID (cedula)
          *
-         * @param doctorId Path parameter - The unique identifier of the doctor profile
+         * @param idNumber Path parameter - The user's identification number (Cédula)
          * @header Authorization Bearer JWT token
          * @return DoctorResponse with doctor profile data
          */
-        get("/{doctorId}") {
+        get("/{idNumber}") {
             try {
                 val authHeader = call.request.headers["Authorization"]
                     ?: throw IllegalArgumentException("Token requerido")
@@ -79,10 +79,10 @@ fun Routing.doctorController(
                 val userInfo = authService.validateToken(token)
                     ?: throw IllegalArgumentException("Token inválido")
 
-                val doctorId = call.parameters["doctorId"]
+                val idNumber = call.parameters["idNumber"]
                     ?: throw IllegalArgumentException("ID de doctor requerido")
 
-                val doctor = doctorService.getDoctorById(doctorId)
+                val doctor = doctorService.getDoctorByUserId(idNumber)
                     ?: throw IllegalArgumentException("Doctor no encontrado")
 
                 call.respond(doctor)
