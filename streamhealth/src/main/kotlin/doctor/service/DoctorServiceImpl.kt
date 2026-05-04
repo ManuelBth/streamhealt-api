@@ -132,7 +132,7 @@ class DoctorServiceImpl(
         )
 
         // Update in repository
-        val result = doctorRepository.update(existingDoctor.id!!, updatedDoctor)
+        val result = doctorRepository.updateByUserId(idNumber, updatedDoctor)
             ?: throw IllegalArgumentException("Error al actualizar el perfil profesional")
 
         result.toDoctorResponse(
