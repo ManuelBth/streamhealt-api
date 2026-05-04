@@ -339,7 +339,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Appointment ID (format: yyyyMMdd-XXXXXX)
+          description: "Appointment ID (format: yyyyMMdd-XXXXXX)"
           example: "20241215-ABC123"
       requestBody:
         required: true
@@ -573,7 +573,7 @@ components:
       properties:
         appointmentId:
           type: string
-          description: Unique human-readable appointment ID (format: yyyyMMdd-XXXXXX)
+          description: "Unique human-readable appointment ID (format: yyyyMMdd-XXXXXX)"
           example: "20241215-ABC123"
         patientId:
           type: string
