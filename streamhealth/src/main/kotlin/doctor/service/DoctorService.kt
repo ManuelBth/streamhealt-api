@@ -23,17 +23,17 @@ interface DoctorService {
 
     /**
      * Create doctor profile for a user
-     * @param userId User's identification number (Cédula)
+     * @param idNumber User's identification number (Cédula)
      * @param request Doctor profile data
      * @return DoctorResponse if user exists and is DOCTOR role, null otherwise
      */
-    suspend fun createDoctorProfile(userId: String, request: CreateDoctorProfileRequest): DoctorResponse?
+    suspend fun createDoctorProfile(idNumber: String, request: CreateDoctorProfileRequest): DoctorResponse?
 
     /**
      * Update doctor profile
-     * @param userId User's identification number (Cédula)
+     * @param idNumber User's identification number (Cédula)
      * @param request Doctor profile update data
      * @return Updated DoctorResponse if found, null otherwise
      */
-    suspend fun updateDoctorProfile(userId: String, request: UpdateDoctorProfileRequest): DoctorResponse?
+    suspend fun updateDoctorProfile(idNumber: String, request: UpdateDoctorProfileRequest): DoctorResponse?
 }

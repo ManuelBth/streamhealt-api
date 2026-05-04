@@ -60,11 +60,11 @@ class DoctorServiceImpl(
         )
     }
 
-    override suspend fun createDoctorProfile(userId: String, request: CreateDoctorProfileRequest): DoctorResponse? = withContext(Dispatchers.IO) {
-        log.info("Creating doctor profile for userId: {}", userId)
+    override suspend fun createDoctorProfile(idNumber: String, request: CreateDoctorProfileRequest): DoctorResponse? = withContext(Dispatchers.IO) {
+        log.info("Creating doctor profile for idNumber: {}", idNumber)
 
         // Find existing user by idNumber
-        val user = userRepository.findByIdNumber(userId)
+        val user = userRepository.findByIdNumber(idNumber)
             ?: throw IllegalArgumentException("Usuario no encontrado")
 
         // Validate user is a doctor
@@ -73,14 +73,14 @@ class DoctorServiceImpl(
         }
 
         // Check if doctor profile already exists
-        val existingDoctor = doctorRepository.findByUserId(userId)
+        val existingDoctor = doctorRepository.findByUserId(idNumber)
         if (existingDoctor != null) {
             throw IllegalArgumentException("El perfil profesional ya existe. Usa PUT para actualizar.")
         }
 
         // Create doctor document
         val doctor = DoctorDocument(
-            userId = userId,
+            userId = idNumber,
             titulo = request.titulo,
             universidad = request.universidad,
             especialidades = request.especialidades,
@@ -103,11 +103,11 @@ class DoctorServiceImpl(
         )
     }
 
-    override suspend fun updateDoctorProfile(userId: String, request: UpdateDoctorProfileRequest): DoctorResponse? = withContext(Dispatchers.IO) {
-        log.info("Updating doctor profile for userId: {}", userId)
+    override suspend fun updateDoctorProfile(idNumber: String, request: UpdateDoctorProfileRequest): DoctorResponse? = withContext(Dispatchers.IO) {
+        log.info("Updating doctor profile for idNumber: {}", idNumber)
 
         // Find existing user
-        val user = userRepository.findByIdNumber(userId)
+        val user = userRepository.findByIdNumber(idNumber)
             ?: throw IllegalArgumentException("Usuario no encontrado")
 
         // Validate user is a doctor
@@ -116,7 +116,7 @@ class DoctorServiceImpl(
         }
 
         // Find existing doctor profile
-        val existingDoctor = doctorRepository.findByUserId(userId)
+        val existingDoctor = doctorRepository.findByUserId(idNumber)
             ?: throw IllegalArgumentException("No existe un perfil profesional. Usa POST para crear uno.")
 
         // Update doctor profile (partial update)
