@@ -154,15 +154,43 @@ class ScheduleServiceImpl(
 
     /**
      * Validar que la fecha es en el futuro
+     * Acepta formatos ISO8601: "2024-12-15T10:00:00Z", "2024-12-15T10:00:00-03:00", "2024-12-15T10:00:00"
      */
     private fun validateFutureDate(fecha: String) {
         try {
-            val dateTime = ZonedDateTime.parse(fecha, DateTimeFormatter.ISO_DATE_TIME)
+            // Intentar parser flexible para ISO8601
+            val dateTime = parseIso8601DateTime(fecha)
             if (dateTime.isBefore(ZonedDateTime.now())) {
                 throw IllegalArgumentException("La fecha debe ser en el futuro")
             }
+        } catch (e: IllegalArgumentException) {
+            throw e  // Re-lanzar mensajes de error ya formateados
         } catch (e: Exception) {
-            throw IllegalArgumentException("Formato de fecha inválido. Use ISO8601 (ej: 2024-12-31T10:00:00-03:00)")
+            throw IllegalArgumentException("Formato de fecha inválido. Use ISO8601 (ej: 2024-12-31T10:00:00Z o 2024-12-31T10:00:00-03:00)")
+        }
+    }
+
+    /**
+     * Parse flexible para fechas ISO8601
+     * Acepta: Z, +00:00, -03:00, o sin timezone
+     */
+    private fun parseIso8601DateTime(fecha: String): ZonedDateTime {
+        return when {
+            // Termina en Z (UTC)
+            fecha.endsWith("Z") -> {
+                ZonedDateTime.parse(fecha.replace("Z", "+00:00"))
+            }
+            // Tiene offset como +00:00 o -03:00
+            fecha.contains(Regex("([+-]\\d{2}:?\\d{2})$")) -> {
+                ZonedDateTime.parse(fecha)
+            }
+            // Sin timezone - asumir hora local
+            else -> {
+                ZonedDateTime.of(
+                    java.time.LocalDateTime.parse(fecha),
+                    java.time.ZoneId.systemDefault()
+                )
+            }
         }
     }
 }
