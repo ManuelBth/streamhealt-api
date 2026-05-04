@@ -1,0 +1,219 @@
+openapi: 3.0.3
+info:
+  title: StreamHealth API
+  description: Betha Telemedicine Platform - Authentication and User Management API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Development server
+paths:
+  /:
+    get:
+      summary: Health check
+      description: Returns a simple health check message
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/v1/auth/login:
+    post:
+      summary: User Login
+      description: Authenticate user with cedula and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - password
+              properties:
+                id:
+                  type: string
+                  description: User identification (cedula)
+                  example: "12345678"
+                password:
+                  type: string
+                  description: User password
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Invalid credentials
+  /api/v1/auth/register:
+    post:
+      summary: User Registration
+      description: Register a new user in the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - idNumber
+                - nombres
+                - apellidos
+                - edad
+                - sexo
+                - password
+                - rol
+              properties:
+                idNumber:
+                  type: string
+                  example: "12345678"
+                nombres:
+                  type: string
+                  example: "Juan"
+                apellidos:
+                  type: string
+                  example: "Perez"
+                edad:
+                  type: integer
+                  example: 30
+                sexo:
+                  type: string
+                  enum: [MASCULINO, FEMENINO, OTRO]
+                  example: "MASCULINO"
+                residencia:
+                  type: string
+                  example: "San Jose"
+                password:
+                  type: string
+                  example: "password123"
+                rol:
+                  type: string
+                  enum: [PACIENTE, DOCTOR, ADMIN]
+                  example: "PACIENTE"
+      responses:
+        '201':
+          description: User registered
+        '400':
+          description: Invalid input
+  /api/v1/user/me:
+    get:
+      summary: Get current user profile
+      description: Get profile of authenticated user from JWT token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+        '401':
+          description: Unauthorized
+    put:
+      summary: Update current user profile
+      description: Update profile of authenticated user from JWT token
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombres:
+                  type: string
+                  nullable: true
+                apellidos:
+                  type: string
+                  nullable: true
+                edad:
+                  type: integer
+                  nullable: true
+                sexo:
+                  type: string
+                  nullable: true
+                  enum: [MASCULINO, FEMENINO, OTRO]
+                residencia:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Profile updated
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/user/{userId}:
+    get:
+      summary: Get user by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "abc123"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User found
+        '404':
+          description: User not found
+  /api/v1/user/me/doctor-perfil:
+    post:
+      summary: Create doctor profile
+      description: Create professional profile for authenticated doctor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                especialidad:
+                  type: string
+                licencia:
+                  type: string
+                telefono:
+                  type: string
+                direccion:
+                  type: string
+      responses:
+        '201':
+          description: Doctor profile created
+        '400':
+          description: Invalid input
+    put:
+      summary: Update doctor profile
+      description: Update professional profile of authenticated doctor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                especialidad:
+                  type: string
+                licencia:
+                  type: string
+                telefono:
+                  type: string
+                direccion:
+                  type: string
+      responses:
+        '200':
+          description: Doctor profile updated
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
