@@ -21,6 +21,7 @@ enum class AppointmentStatus {
 @Serializable
 data class AppointmentDocument(
     val id: String? = null,           // MongoDB ObjectId
+    val appointmentId: String,         // Compound ID: 20241215-ABC123
     val patientId: String,            // idNumber (cédula del paciente)
     val doctorId: String,            // idNumber (cédula del doctor)
     val fecha: String,               // ISO8601 datetime
