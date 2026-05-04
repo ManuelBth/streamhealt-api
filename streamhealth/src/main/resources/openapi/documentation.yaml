@@ -245,21 +245,20 @@ paths:
           description: Forbidden - requires DOCTOR role
         '404':
           description: Doctor profile not found
-  /api/v1/doctors/{doctorId}:
+  /api/v1/doctors/{idNumber}:
     get:
-      summary: Get doctor by ID
-      description: Retrieve a specific doctor by their doctor ID
+      summary: Get doctor by ID Number
+      description: Retrieve a specific doctor by their identification number (cedula)
       security:
         - bearerAuth: []
       parameters:
-        - name: doctorId
+        - name: idNumber
           in: path
           required: true
           schema:
             type: string
-            format: uuid
-          description: Unique identifier of the doctor
-          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: User identification number (cedula)
+          example: "12345678"
       responses:
         '200':
           description: Doctor found
@@ -342,9 +341,8 @@ components:
           example: "550e8400-e29b-41d4-a716-446655440000"
         userId:
           type: string
-          format: uuid
-          description: User ID associated with this doctor profile
-          example: "660e8400-e29b-41d4-a716-446655440001"
+          description: User identification number (cedula) associated with this doctor profile
+          example: "12345678"
         titulo:
           type: string
           description: Title or prefix (e.g., Dr., Dra.)
