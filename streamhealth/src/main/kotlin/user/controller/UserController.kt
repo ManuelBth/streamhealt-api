@@ -82,7 +82,7 @@ fun Routing.userController(
                 val userId = call.parameters["userId"]
                     ?: throw IllegalArgumentException("ID de usuario requerido")
                 
-                val user = userService.getUserById(userId)
+                val user = userService.getUserByIdNumber(userId)
                     ?: throw IllegalArgumentException("Usuario no encontrado")
                 
                 call.respond(user)
