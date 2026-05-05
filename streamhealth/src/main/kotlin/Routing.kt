@@ -4,6 +4,10 @@ import com.betha.auth.controller.authController
 import com.betha.auth.service.AuthService
 import com.betha.doctor.controller.doctorController
 import com.betha.doctor.service.DoctorService
+import com.betha.medicalHistory.controller.medicalHistoryController
+import com.betha.medicalHistory.service.MedicalHistoryService
+import com.betha.prescription.controller.prescriptionController
+import com.betha.prescription.service.PrescriptionService
 import com.betha.schedule.controller.scheduleController
 import com.betha.schedule.service.ScheduleService
 import com.betha.user.controller.userController
@@ -29,6 +33,8 @@ fun Application.configureRouting() {
     val userService: UserService by inject()
     val doctorService: DoctorService by inject()
     val scheduleService: ScheduleService by inject()
+    val medicalHistoryService: MedicalHistoryService by inject()
+    val prescriptionService: PrescriptionService by inject()
 
     routing {
         // Ruta raíz
@@ -41,6 +47,8 @@ fun Application.configureRouting() {
         userController(userService, authService)
         doctorController(doctorService, authService)
         scheduleController(scheduleService, authService)
+        medicalHistoryController(medicalHistoryService, authService)
+        prescriptionController(prescriptionService, authService)
 
         // Swagger UI al final
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")

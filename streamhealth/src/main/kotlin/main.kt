@@ -13,6 +13,14 @@ import com.betha.doctor.repository.DoctorRepository
 import com.betha.doctor.repository.DoctorRepositoryImpl
 import com.betha.doctor.service.DoctorService
 import com.betha.doctor.service.DoctorServiceImpl
+import com.betha.medicalHistory.repository.MedicalHistoryRepository
+import com.betha.medicalHistory.repository.MedicalHistoryRepositoryImpl
+import com.betha.medicalHistory.service.MedicalHistoryService
+import com.betha.medicalHistory.service.MedicalHistoryServiceImpl
+import com.betha.prescription.repository.PrescriptionRepository
+import com.betha.prescription.repository.PrescriptionRepositoryImpl
+import com.betha.prescription.service.PrescriptionService
+import com.betha.prescription.service.PrescriptionServiceImpl
 import com.betha.schedule.repository.ScheduleRepository
 import com.betha.schedule.repository.ScheduleRepositoryImpl
 import com.betha.schedule.service.ScheduleService
@@ -46,7 +54,9 @@ fun Application.configureKoin() {
             authModule,
             userModule,
             doctorModule,
-            scheduleModule
+            scheduleModule,
+            medicalHistoryModule,
+            prescriptionModule
         )
     }
 }
@@ -88,4 +98,16 @@ val doctorModule = org.koin.dsl.module {
 val scheduleModule = org.koin.dsl.module {
     single<ScheduleRepository> { ScheduleRepositoryImpl() }
     single<ScheduleService> { ScheduleServiceImpl(get(), get()) }
+}
+
+// Módulo de historial médico
+val medicalHistoryModule = org.koin.dsl.module {
+    single<MedicalHistoryRepository> { MedicalHistoryRepositoryImpl() }
+    single<MedicalHistoryService> { MedicalHistoryServiceImpl(get(), get()) }
+}
+
+// Módulo de recetas/prescripciones
+val prescriptionModule = org.koin.dsl.module {
+    single<PrescriptionRepository> { PrescriptionRepositoryImpl() }
+    single<PrescriptionService> { PrescriptionServiceImpl(get(), get(), get()) }
 }

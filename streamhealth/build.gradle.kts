@@ -17,7 +17,7 @@ kotlin {
 }
 dependencies {
     // KTor
-    implementation(ktorLibs.serialization.jackson)
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.2")
     implementation(ktorLibs.server.auth)
     implementation(ktorLibs.server.auth.jwt)
     implementation(ktorLibs.server.config.yaml)
