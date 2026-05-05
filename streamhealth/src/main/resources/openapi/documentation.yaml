@@ -286,8 +286,8 @@ paths:
               $ref: '#/components/schemas/CreateAppointmentRequest'
             example:
               fecha: "2024-12-15T10:00:00Z"
-              doctorId: "12345678"
-              patientId: "87654321"
+              doctorId: "87654321"
+              patientId: "12345678"
               motivo: "Dolor de cabeza persistente"
       responses:
         '201':
@@ -315,7 +315,7 @@ paths:
           schema:
             type: string
           description: Patient identification number (cedula)
-          example: "87654321"
+          example: "12345678"
       responses:
         '200':
           description: List of appointments
@@ -436,6 +436,272 @@ paths:
           description: Forbidden
         '404':
           description: Appointment not found
+  /api/v1/medical-history:
+    post:
+      summary: Create medical history
+      description: Create a new medical history record (typically after appointment completion)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMedicalHistoryRequest'
+            example:
+              patientId: "12345678"
+              doctorId: "87654321"
+              appointmentId: "20241215-ABC123"
+              diagnostico: "Migraña crónica"
+              observaciones: "Paciente presenta dolores de cabeza frecuentes"
+        responses:
+          '201':
+            description: Medical history created
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/MedicalHistoryResponse'
+          '400':
+            description: Invalid input
+          '401':
+            description: Unauthorized
+  /api/v1/medical-history/patient/{patientId}:
+    get:
+      summary: Get patient medical histories
+      description: Retrieve all medical histories for a specific patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Patient identification number (cedula)
+          example: "12345678"
+      responses:
+        '200':
+          description: List of medical histories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MedicalHistoryResponse'
+        '401':
+          description: Unauthorized
+  /api/v1/medical-history/{historyId}:
+    get:
+      summary: Get medical history by ID
+      description: Retrieve a specific medical history by its unique ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: historyId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Medical history unique ID (e.g., "MH-20241215-ABC123")
+          example: "MH-20241215-ABC123"
+      responses:
+        '200':
+          description: Medical history found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalHistoryResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Medical history not found
+    put:
+      summary: Update medical history
+      description: Update an existing medical history (typically diagnosis or prescriptions)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: historyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMedicalHistoryRequest'
+            example:
+              diagnostico: "Migraña crónica con aura"
+              observaciones: "Paciente refiere empeoramiento de sintomas"
+              recetas: ["Paracetamol 500mg cada 8 horas", "Migranol 1mg al inicio de crisis"]
+      responses:
+        '200':
+          description: Medical history updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalHistoryResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Medical history not found
+    delete:
+      summary: Delete medical history
+      description: Delete a medical history record
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: historyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Medical history deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Medical history not found
+  /api/v1/prescriptions:
+    post:
+      summary: Create prescription
+      description: Create a new medical prescription
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrescriptionRequest'
+            example:
+              patientId: "12345678"
+              doctorId: "87654321"
+              medicalHistoryId: "MH-20241215-ABC123"
+              medicamento: "Paracetamol 500mg"
+              cantidad: "30"
+              frecuencia: "cada 8 horas"
+              recomendaciones: "Tomar con comida"
+              fechaValidacion: "2024-12-15T10:00:00Z"
+      responses:
+        '201':
+          description: Prescription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+  /api/v1/prescriptions/patient/{patientId}:
+    get:
+      summary: Get patient prescriptions
+      description: Retrieve all prescriptions for a specific patient
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Patient identification number (cedula)
+          example: "12345678"
+      responses:
+        '200':
+          description: List of prescriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrescriptionResponse'
+        '401':
+          description: Unauthorized
+  /api/v1/prescriptions/{prescriptionId}:
+    get:
+      summary: Get prescription by ID
+      description: Retrieve a specific prescription by its unique ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: prescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Prescription unique ID (e.g., "RX-20241215-ABC123")
+          example: "RX-20241215-ABC123"
+      responses:
+        '200':
+          description: Prescription found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Prescription not found
+    put:
+      summary: Update prescription
+      description: Update an existing prescription
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: prescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePrescriptionRequest'
+            example:
+              medicamento: "Paracetamol 500mg"
+              cantidad: "30"
+              frecuencia: "cada 6 horas"
+              recomendaciones: "Tomar con comida y leche"
+      responses:
+        '200':
+          description: Prescription updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Prescription not found
+    delete:
+      summary: Delete prescription
+      description: Delete a prescription record
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: prescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Prescription deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Prescription not found
 components:
   securitySchemes:
     bearerAuth:
@@ -551,11 +817,11 @@ components:
         doctorId:
           type: string
           description: Doctor's identification number (cedula)
-          example: "12345678"
+          example: "87654321"
         patientId:
           type: string
           description: Patient's identification number (cedula)
-          example: "87654321"
+          example: "12345678"
         motivo:
           type: string
           description: Reason for the appointment / symptoms
@@ -578,28 +844,195 @@ components:
         patientId:
           type: string
           description: Patient's identification number (cedula)
+          example: "12345678"
+        doctorId:
+          type: string
+          description: Doctor's identification number (cedula)
+          example: "87654321"
+    UpdateMedicalHistoryRequest:
+      type: object
+      properties:
+        diagnostico:
+          type: string
+          description: Updated medical diagnosis
+          example: "Migraña crónica con aura"
+          nullable: true
+        observaciones:
+          type: string
+          description: Updated observations
+          example: "Paciente refiere empeoramiento de sintomas"
+          nullable: true
+        recetas:
+          type: array
+          items:
+            type: string
+          description: List of prescriptions
+          example: ["Paracetamol 500mg cada 8 horas", "Migranol 1mg al inicio de crisis"]
+          nullable: true
+    MedicalHistoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: MongoDB document ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        medicalHistoryId:
+          type: string
+          description: "Unique human-readable medical history ID (format: MH-yyyyMMdd-XXXXXX)"
+          example: "MH-20241215-ABC123"
+        patientId:
+          type: string
+          description: Patient's identification number (cedula)
           example: "87654321"
         doctorId:
           type: string
           description: Doctor's identification number (cedula)
           example: "12345678"
-        fecha:
+        appointmentId:
           type: string
-          format: date-time
-          description: Appointment date/time
-          example: "2024-12-15T10:00:00Z"
-        motivo:
+          description: Associated appointment ID
+          example: "20241215-ABC123"
+        diagnostico:
           type: string
-          description: Reason for the appointment
-          example: "Dolor de cabeza persistente"
-        estado:
+          description: Medical diagnosis
+          example: "Migraña crónica"
+        observaciones:
           type: string
-          enum: [pendiente, confirmada, cancelada, completada]
-          description: Current appointment status
-          example: "pendiente"
+          description: Doctor's observations
+          example: "Paciente presenta dolores de cabeza frecuentes"
+        recetas:
+          type: array
+          items:
+            type: string
+          description: List of prescriptions
+          example: ["Paracetamol 500mg cada 8 horas"]
         createdAt:
           type: integer
           description: Creation timestamp
         updatedAt:
           type: integer
           description: Last update timestamp
+    CreatePrescriptionRequest:
+      type: object
+      required:
+        - patientId
+        - doctorId
+        - medicalHistoryId
+        - medicamento
+        - cantidad
+        - frecuencia
+        - fechaValidacion
+      properties:
+        patientId:
+          type: string
+          description: Patient's identification number (cedula)
+          example: "87654321"
+        doctorId:
+          type: string
+          description: Doctor's identification number (cedula)
+          example: "12345678"
+        medicalHistoryId:
+          type: string
+          description: Associated medical history ID
+          example: "MH-20241215-ABC123"
+        medicamento:
+          type: string
+          description: Medication name and dosage
+          example: "Paracetamol 500mg"
+        cantidad:
+          type: string
+          description: Quantity/pill count
+          example: "30"
+        frecuencia:
+          type: string
+          description: Frequency of intake
+          example: "cada 8 horas"
+        recomendaciones:
+          type: string
+          description: Additional recommendations
+          example: "Tomar con comida"
+          nullable: true
+        fechaValidacion:
+          type: string
+          format: date-time
+          description: Prescription validation date
+          example: "2024-12-15T10:00:00Z"
+    UpdatePrescriptionRequest:
+      type: object
+      properties:
+        medicamento:
+          type: string
+          description: Updated medication name and dosage
+          example: "Paracetamol 500mg"
+          nullable: true
+        cantidad:
+          type: string
+          description: Updated quantity/pill count
+          example: "30"
+          nullable: true
+        frecuencia:
+          type: string
+          description: Updated frequency of intake
+          example: "cada 6 horas"
+          nullable: true
+        recomendaciones:
+          type: string
+          description: Updated recommendations
+          example: "Tomar con comida y leche"
+          nullable: true
+        fechaValidacion:
+          type: string
+          format: date-time
+          description: Updated validation date
+          example: "2024-12-16T10:00:00Z"
+          nullable: true
+    PrescriptionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: MongoDB document ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        prescriptionId:
+          type: string
+          description: "Unique human-readable prescription ID (format: RX-yyyyMMdd-XXXXXX)"
+          example: "RX-20241215-ABC123"
+        patientId:
+          type: string
+          description: Patient's identification number (cedula)
+          example: "87654321"
+        doctorId:
+          type: string
+          description: Doctor's identification number (cedula)
+          example: "12345678"
+        medicalHistoryId:
+          type: string
+          description: Associated medical history ID
+          example: "MH-20241215-ABC123"
+        medicamento:
+          type: string
+          description: Medication name and dosage
+          example: "Paracetamol 500mg"
+        cantidad:
+          type: string
+          description: Quantity/pill count
+          example: "30"
+        frecuencia:
+          type: string
+          description: Frequency of intake
+          example: "cada 8 horas"
+        recomendaciones:
+          type: string
+          description: Additional recommendations
+          example: "Tomar con comida"
+          nullable: true
+        fechaValidacion:
+          type: string
+          format: date-time
+          description: Prescription validation date
+          example: "2024-12-15T10:00:00Z"
+        createdAt:
+          type: integer
+          description: Creation timestamp
