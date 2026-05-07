@@ -5,11 +5,15 @@ import com.betha.common.document.Rol
 import com.betha.doctor.dto.CreateDoctorProfileRequest
 import com.betha.doctor.dto.UpdateDoctorProfileRequest
 import com.betha.doctor.service.DoctorService
-import io.ktor.server.application.*
-import io.ktor.server.plugins.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.route
+import io.ktor.server.routing.openapi.describe
 
 /**
  * Doctor controller with professional profile routes
@@ -50,14 +54,25 @@ fun Routing.doctorController(
                 call.respond(doctors)
             } catch (e: IllegalArgumentException) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.Unauthorized,
+                    status = HttpStatusCode.Unauthorized,
                     message = mapOf("error" to (e.message ?: "Error de autenticación"))
                 )
             } catch (e: Exception) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.InternalServerError,
+                    status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "List all doctors"
+            description = "Retrieves all doctors with their professional profiles"
+            responses {
+                HttpStatusCode.OK {
+                    description = "List of doctors retrieved successfully"
+                }
+                HttpStatusCode.Unauthorized {
+                    description = "Invalid or missing token"
+                }
             }
         }
 
@@ -88,14 +103,28 @@ fun Routing.doctorController(
                 call.respond(doctor)
             } catch (e: IllegalArgumentException) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.Unauthorized,
+                    status = HttpStatusCode.Unauthorized,
                     message = mapOf("error" to (e.message ?: "Error de autenticación"))
                 )
             } catch (e: Exception) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.InternalServerError,
+                    status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Get doctor by ID Number"
+            description = "Retrieves a specific doctor's profile by their identification number (cedula)"
+            responses {
+                HttpStatusCode.OK {
+                    description = "Doctor profile found"
+                }
+                HttpStatusCode.Unauthorized {
+                    description = "Invalid or missing token"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Doctor not found"
+                }
             }
         }
 
@@ -126,17 +155,34 @@ fun Routing.doctorController(
                 val doctor = doctorService.createDoctorProfile(userInfo.id, request)
                     ?: throw IllegalArgumentException("Error al crear el perfil profesional")
 
-                call.respond(doctor)
+                call.respond(HttpStatusCode.Created, doctor)
             } catch (e: IllegalArgumentException) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.BadRequest,
+                    status = HttpStatusCode.BadRequest,
                     message = mapOf("error" to (e.message ?: "Error de validación"))
                 )
             } catch (e: Exception) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.InternalServerError,
+                    status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Create doctor profile"
+            description = "Creates a professional doctor profile (requires DOCTOR role)"
+            responses {
+                HttpStatusCode.Created {
+                    description = "Doctor profile created successfully"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid input"
+                }
+                HttpStatusCode.Unauthorized {
+                    description = "Invalid or missing token"
+                }
+                HttpStatusCode.Forbidden {
+                    description = "Requires DOCTOR role"
+                }
             }
         }
 
@@ -170,14 +216,34 @@ fun Routing.doctorController(
                 call.respond(doctor)
             } catch (e: IllegalArgumentException) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.BadRequest,
+                    status = HttpStatusCode.BadRequest,
                     message = mapOf("error" to (e.message ?: "Error de validación"))
                 )
             } catch (e: Exception) {
                 call.respond(
-                    status = io.ktor.http.HttpStatusCode.InternalServerError,
+                    status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Update doctor profile"
+            description = "Updates the professional doctor profile (requires DOCTOR role)"
+            responses {
+                HttpStatusCode.OK {
+                    description = "Doctor profile updated successfully"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid input"
+                }
+                HttpStatusCode.Unauthorized {
+                    description = "Invalid or missing token"
+                }
+                HttpStatusCode.Forbidden {
+                    description = "Requires DOCTOR role"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Doctor profile not found"
+                }
             }
         }
     }
