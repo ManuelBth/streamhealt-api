@@ -2,14 +2,18 @@ package com.betha.medicalHistory.controller
 
 import com.betha.auth.service.AuthService
 import com.betha.medicalHistory.dto.CreateMedicalHistoryRequest
-import com.betha.medicalHistory.dto.MedicalHistoryResponse
 import com.betha.medicalHistory.dto.UpdateMedicalHistoryRequest
 import com.betha.medicalHistory.service.MedicalHistoryService
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.route
+import io.ktor.server.routing.openapi.describe
 
 /**
  * Medical History controller for managing patient medical records
@@ -46,6 +50,17 @@ fun Routing.medicalHistoryController(
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
             }
+        }.describe {
+            summary = "Create medical history"
+            description = "Create a new medical history record (typically after appointment completion)"
+            responses {
+                HttpStatusCode.Created {
+                    description = "Medical history created successfully"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid input or validation error"
+                }
+            }
         }
 
         /**
@@ -68,6 +83,17 @@ fun Routing.medicalHistoryController(
                     status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Get patient medical histories"
+            description = "Retrieve all medical histories for a specific patient"
+            responses {
+                HttpStatusCode.OK {
+                    description = "List of medical histories"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid request parameters"
+                }
             }
         }
 
@@ -98,6 +124,17 @@ fun Routing.medicalHistoryController(
                     status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Get medical history by ID"
+            description = "Retrieve a specific medical history by its unique ID"
+            responses {
+                HttpStatusCode.OK {
+                    description = "Medical history found"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Medical history not found"
+                }
             }
         }
 
@@ -130,6 +167,20 @@ fun Routing.medicalHistoryController(
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
             }
+        }.describe {
+            summary = "Update medical history"
+            description = "Update an existing medical history (typically diagnosis or prescriptions)"
+            responses {
+                HttpStatusCode.OK {
+                    description = "Medical history updated successfully"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid input"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Medical history not found"
+                }
+            }
         }
 
         /**
@@ -159,6 +210,17 @@ fun Routing.medicalHistoryController(
                     status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Delete medical history"
+            description = "Delete a medical history record"
+            responses {
+                HttpStatusCode.NoContent {
+                    description = "Medical history deleted successfully"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Medical history not found"
+                }
             }
         }
     }
