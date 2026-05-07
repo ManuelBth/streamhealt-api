@@ -50,8 +50,11 @@ fun Application.configureRouting() {
         medicalHistoryController(medicalHistoryService, authService)
         prescriptionController(prescriptionService, authService)
 
-        // Swagger UI al final
+        // OpenAPI auto-generated spec (uses .describe() annotations from routes)
+        // Keep the static YAML as fallback, but routes with .describe() will generate dynamic spec
+        openAPI(path = "openapi")
+
+        // Swagger UI (uses static YAML - will be updated to dynamic in future iteration)
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
-        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
 }
