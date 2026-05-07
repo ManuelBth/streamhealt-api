@@ -5,11 +5,15 @@ import com.betha.schedule.dto.CreateAppointmentRequest
 import com.betha.schedule.dto.UpdateAppointmentRequest
 import com.betha.schedule.service.ScheduleService
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
-import io.ktor.server.plugins.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.route
+import io.ktor.server.routing.openapi.describe
 
 /**
  * Schedule controller for patient and doctor appointment management
@@ -54,6 +58,17 @@ fun Routing.scheduleController(
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
             }
+        }.describe {
+            summary = "Create appointment"
+            description = "Patient books an appointment with a doctor"
+            responses {
+                HttpStatusCode.Created {
+                    description = "Appointment created successfully"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid input or validation error"
+                }
+            }
         }
 
         /**
@@ -76,6 +91,17 @@ fun Routing.scheduleController(
                     status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Get patient appointments"
+            description = "Retrieve all appointments for a specific patient"
+            responses {
+                HttpStatusCode.OK {
+                    description = "List of patient appointments"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid request parameters"
+                }
             }
         }
 
@@ -108,6 +134,20 @@ fun Routing.scheduleController(
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
             }
+        }.describe {
+            summary = "Update patient appointment"
+            description = "Patient cancels their own appointment"
+            responses {
+                HttpStatusCode.OK {
+                    description = "Appointment updated successfully"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid request"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Appointment not found"
+                }
+            }
         }
 
         /**
@@ -138,6 +178,17 @@ fun Routing.scheduleController(
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
             }
+        }.describe {
+            summary = "Delete appointment"
+            description = "Patient deletes their own appointment"
+            responses {
+                HttpStatusCode.NoContent {
+                    description = "Appointment deleted successfully"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Appointment not found"
+                }
+            }
         }
     }
 
@@ -166,6 +217,17 @@ fun Routing.scheduleController(
                     status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Get doctor appointments"
+            description = "Retrieve all appointments for a specific doctor"
+            responses {
+                HttpStatusCode.OK {
+                    description = "List of doctor appointments"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid request parameters"
+                }
             }
         }
 
@@ -197,6 +259,20 @@ fun Routing.scheduleController(
                     status = HttpStatusCode.InternalServerError,
                     message = mapOf("error" to (e.message ?: "Error interno"))
                 )
+            }
+        }.describe {
+            summary = "Update doctor appointment"
+            description = "Doctor updates appointment status (confirm, complete, cancel)"
+            responses {
+                HttpStatusCode.OK {
+                    description = "Appointment updated successfully"
+                }
+                HttpStatusCode.BadRequest {
+                    description = "Invalid request"
+                }
+                HttpStatusCode.NotFound {
+                    description = "Appointment not found"
+                }
             }
         }
     }
